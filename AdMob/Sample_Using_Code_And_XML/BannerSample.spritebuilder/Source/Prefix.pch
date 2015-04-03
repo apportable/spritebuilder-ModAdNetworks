@@ -1,0 +1,16 @@
+#import <Availability.h>
+
+#ifdef __OBJC__
+#import <Foundation/Foundation.h>
+#import "cocos2d.h"
+#import "cocos2d-ui.h"
+#endif
+
+#ifdef __CC_PLATFORM_ANDROID
+// These three undefs are currently needed to avoid conflicts with Android's Java
+// implementation of EGL. Future versions of SBAndroid will not need these.
+#undef EGL_NO_CONTEXT
+#undef EGL_NO_DISPLAY
+#undef EGL_NO_SURFACE
+#import <AndroidKit/AndroidKit.h>
+#endif

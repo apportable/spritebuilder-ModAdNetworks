@@ -1,0 +1,161 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1344\cocoasubrtf720
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Menlo-Regular;\f2\fmodern\fcharset0 Courier;
+}
+{\colortbl;\red255\green255\blue255;\red100\green56\blue32;\red0\green116\blue0;\red196\green26\blue22;
+\red170\green13\blue145;\red131\green108\blue40;\red11\green86\blue1;\red14\green14\blue255;}
+\margl1440\margr1440\vieww18540\viewh11920\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0\b\fs24 \cf0 Fixing existing SpriteBuilder projects:
+\b0 \
+\
+Re-Add CoreJava to the Android Target, if it is red.\
+\
+Add -lcxx to <ProjectName Android> target OTHER LINKER FLAGS\
+\
+Add the following to the Project Prefix.pch:\
+\
+\pard\tx529\pardeftab529\pardirnatural
+
+\f1\fs22 \cf2 \CocoaLigature0 	#ifdef __CC_PLATFORM_ANDROID\
+\cf3 	// These three undefs are currently needed to avoid conflicts with Android's Java\cf0 \
+\cf3 	// implementation of EGL. Future versions of SBAndroid will not need these.\cf0 \
+\cf2 	#undef EGL_NO_CONTEXT\
+	#undef EGL_NO_DISPLAY\
+	#undef EGL_NO_SURFACE\
+	#import \cf4 <AndroidKit/AndroidKit.h>\cf2 \
+	#endif
+\f0\fs24 \cf0 \CocoaLigature1 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+AndroidManifest Needs the Application to have:\
+\pard\tx529\pardeftab529\pardirnatural
+
+\f1\fs22 \cf0 \CocoaLigature0     \cf5 <application\
+        \cf6 android\cf5 :\cf6 name\cf5 =\cf4 "com.apportable.BasicRuntimeApplication"\cf5 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0\fs24 \cf0 \CocoaLigature1 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b \cf0 Using AdMob with Objective-C, on Android\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\b0 \cf0 First we need to write Objective-C bridging classes for each AdMob Java classes we want to make visible.\
+\
+Minimally, we need AdView, AdRequestBuilder, and AdRequest.  Write those and add them to your Android target.\
+\
+Look at the sample code for a MINIMAL working subset of the code you need.  You could expand it to support interstitials or other sizes.  This sample just uses BANNER.\
+\
+Generally,  if your project needs external Jars:\
+	1. Open the Build Phases for your Android target\
+	2. Add a new Copy Files build phase with\
+		destination: Products Directory\
+		subdirectory: <leave this field empty>\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+\cf0 		     {{\NeXTGraphic Screen Shot 2015-03-30 at 4.31.02 PM.png \width16580 \height5680
+}¬}\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+		{{\NeXTGraphic Screen Shot 2015-03-30 at 4.31.39 PM.png \width7220 \height1420
+}¬}\
+\
+3. Add the Jar to this phase.\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+\cf0 		{{\NeXTGraphic Screen Shot 2015-03-30 at 4.36.08 PM.png \width13440 \height3280
+}¬}\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 AdMob on Android is implemented in google-play-services.jar, which has its own manifest and res folder.  From 
+\f2\fs26 \cf7 \expnd0\expndtw0\kerning0
+<android-sdk>/extras/google/google_play_services/libproject/google-play-services_lib/>
+\f0\fs24 \cf0 \kerning1\expnd0\expndtw0 \
+\
+We want to copy a few files from that folder (the jar might be in the lib subfolder) to one single folder somewhere in your project.  Say for example \
+\
+	
+\b BannerSample.spritebuilder/Source/Platforms/Android/GooglePlayServices/
+\b0 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+\cf0 		AndroidManifest.xml\
+		google-play-services.jar\
+		res\
+\
+Due to some quirks in the build process, this folder is not actually be part of any target.  It is just a folder reference in the project.\
+\
+Drag the google-play-services.jar into the Copy files build phase, and it will be re-added to your project by reference, as a part of the Android target:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 Add the following to AndroidManifest.xml, before </application>\
+\
+\pard\tx529\pardeftab529\pardirnatural
+
+\f1\fs22 \cf0 \CocoaLigature0         \cf5 <meta-data \cf6 android\cf5 :\cf6 name\cf5 =\cf4 "com.google.android.gms.version"\cf5  \cf6 android\cf5 :\cf6 value\cf5 =\cf4 "@integer/google_play_services_version"\cf5  />\cf0 \
+        \cf5 <activity \cf6 android\cf5 :\cf6 name\cf5 =\cf4 "com.google.android.gms.ads.AdActivity"\cf5 \
+            \cf6 android\cf5 :\cf6 configChanges\cf5 =\cf4 "keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"\cf5 \
+            \cf6 android\cf5 :\cf6 theme\cf5 =\cf4 "@android:style/Theme.Translucent"\cf5  />
+\f0\fs24 \cf0 \CocoaLigature1 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+This adds an advertising activity to your app.\
+\
+Next we want to specify the layout of the advertising banner.  We can use just Objective-C code, as shown in the 
+\b BannerCodeSample
+\b0  project, or we can use a mix of Objective-C to setup the view, and XML to specify the advertising view type and layout.  The 
+\b BannerSample
+\b0  project uses a mix of XML and code.\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+
+\b \cf0 Layout the advertising banner using just Objective-C code
+\b0 \
+\
+Create the Layout you want (AndroidRelativeLayout for instance) and add an AdView to it, then add it to your main activity.  See the Banner
+\b Code
+\b0 Sample project for a working minimal example that uses this format.
+\b \
+\
+Layout the advertising banner using XML and code
+\b0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+Look at the BannerSample project for a minimal working sample.\
+\
+In your project under Resources, remove the res folder (just remove the reference to it, don't delete the files!) Re-add it to the project as a FOLDER reference used only by the Android target.\
+\
+In res, create files similar to the Google getting started guide for AdMob:\
+https://developers.google.com/mobile-ads-sdk/docs/admob/android/quick-start\
+\
+layout/main.xml:\
+\
+\pard\tx529\pardeftab529\pardirnatural
+
+\f1\fs22 \cf5 \CocoaLigature0 <RelativeLayout \cf6 xmlns\cf5 :\cf6 android\cf5 =\cf4 "{\field{\*\fldinst{HYPERLINK "http://schemas.android.com/apk/res/android"}}{\fldrslt \cf8 http://schemas.android.com/apk/res/android}}"\cf5 \
+    \cf6 xmlns\cf5 :\cf6 tools\cf5 =\cf4 "{\field{\*\fldinst{HYPERLINK "http://schemas.android.com/tools"}}{\fldrslt \cf8 http://schemas.android.com/tools}}"\cf5 \
+    \cf6 android\cf5 :\cf6 layout_width\cf5 =\cf4 "match_parent"\cf5 \
+    \cf6 android\cf5 :\cf6 layout_height\cf5 =\cf4 "match_parent"\cf5 \
+    \cf6 tools\cf5 :\cf6 context\cf5 =\cf4 "com.apportable.GLActivity"\cf5 >\cf0 \
+\
+    \cf5 <com.google.android.gms.ads.AdView\
+        \cf6 xmlns\cf5 :\cf6 ads\cf5 =\cf4 "{\field{\*\fldinst{HYPERLINK "http://schemas.android.com/apk/res-auto"}}{\fldrslt \cf8 http://schemas.android.com/apk/res-auto}}"\cf5 \
+        \cf6 android\cf5 :\cf6 id\cf5 =\cf4 "@+id/adView"\cf5 \
+        \cf6 android\cf5 :\cf6 layout_width\cf5 =\cf4 "wrap_content"\cf5 \
+        \cf6 android\cf5 :\cf6 layout_height\cf5 =\cf4 "wrap_content"\cf5 \
+        \cf6 android\cf5 :\cf6 layout_centerHorizontal\cf5 =\cf4 "true"\cf5 \
+        \cf6 android\cf5 :\cf6 layout_alignParentBottom\cf5 =\cf4 "true"\cf5 \
+        \cf6 ads\cf5 :\cf6 adSize\cf5 =\cf4 "BANNER"\cf5 \
+        \cf6 ads\cf5 :\cf6 adUnitId\cf5 =\cf4 "@string/banner_ad_unit_id"\cf5 >\cf0 \
+    \cf5 </com.google.android.gms.ads.AdView>\cf0 \
+\cf5 </RelativeLayout>
+\f0\fs24 \cf0 \CocoaLigature1 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+values/strings.xml:\
+\
+\pard\tx529\pardeftab529\pardirnatural
+
+\f1\fs22 \cf5 \CocoaLigature0 <?xml version=\cf4 "1.0"\cf5  encoding=\cf4 "utf-8"\cf5 ?>\cf0 \
+\cf5 <resources>\cf0 \
+    \cf5 <string \cf6 name\cf5 =\cf4 "banner_ad_unit_id"\cf5 >\cf0 ca-app-pub-3940256099942544/6300978111\cf5 </string>\cf0 \
+\cf5 </resources>}

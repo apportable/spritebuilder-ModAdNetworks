@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     
     <application
+        android:name="com.apportable.BasicRuntimeApplication"
         android:allowBackup="true"
         android:label="MPDroidExample"
         android:debuggable="true"
